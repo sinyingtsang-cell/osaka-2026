@@ -1,0 +1,308 @@
+{\rtf1\ansi\ansicpg950\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww28600\viewh14760\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 <!DOCTYPE html>\
+<html lang="zh-TW">\
+<head>\
+    <meta charset="UTF-8">\
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">\
+    <title>\uc0\u55356 \u57144  2026 \u22823 \u38442 \u26149 \u26085 \u36062 \u27387 \u20043 \u26053 </title>\
+    <script src="https://cdn.tailwindcss.com"></script>\
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>\
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">\
+    <script>\
+        tailwind.config = \{\
+            theme: \{\
+                extend: \{\
+                    colors: \{\
+                        brand: '#2DD4BF', // \uc0\u28246 \u27700 \u32160  (Teal-400)\
+                        brandDark: '#14B8A6',\
+                        bgLight: '#F3F4F6'\
+                    \}\
+                \}\
+            \}\
+        \}\
+    </script>\
+    <style>\
+        body \{ background-color: #f9fafb; font-family: 'Helvetica Neue', Arial, sans-serif; \}\
+        /* \uc0\u38577 \u34255 \u25458 \u36600 \u20294 \u21487 \u28414 \u21205  */\
+        .no-scrollbar::-webkit-scrollbar \{ display: none; \}\
+        .no-scrollbar \{ -ms-overflow-style: none; scrollbar-width: none; \}\
+        /* \uc0\u28689 \u24067 \u27969 \u30456 \u29255 \u29254  */\
+        .masonry \{ column-count: 2; column-gap: 1rem; \}\
+        .masonry-item \{ break-inside: avoid; margin-bottom: 1rem; \}\
+        /* \uc0\u27169 \u25836 \u25163 \u27231 \u22806 \u26694  (\u38651 \u33126 \u19978 \u30475 \u26178 ) */\
+        .app-container \{ max-width: 480px; margin: 0 auto; background: white; min-height: 100vh; position: relative; padding-bottom: 80px; box-shadow: 0 0 20px rgba(0,0,0,0.05); \}\
+    </style>\
+</head>\
+<body>\
+\
+<div id="app" class="app-container">\
+    <div class="sticky top-0 z-50 bg-white shadow-sm">\
+        <h1 class="text-xl font-bold text-center py-4 text-gray-800">\uc0\u55356 \u57144  2026 \u22823 \u38442 \u26149 \u26085 \u36062 \u27387 \u20043 \u26053 </h1>\
+        <div class="bg-brand text-white text-xs text-center py-1.5 flex justify-center items-center gap-2">\
+            <i class="fa-solid fa-yen-sign"></i>\
+            <span>\uc0\u20170 \u26085 \u21295 \u29575 \u65306 1 HKD \u8776  \{\{ exchangeRate.toFixed(2) \}\} JPY</span>\
+            <button @click="fetchExchangeRate" class="hover:text-gray-200"><i class="fa-solid fa-rotate"></i></button>\
+        </div>\
+    </div>\
+\
+    <div class="p-4">\
+        \
+        <div v-show="activeTab === 'itinerary'" class="space-y-4">\
+            <h2 class="text-lg font-bold text-gray-700 border-l-4 border-brand pl-2">\uc0\u34892 \u31243 \u34920 </h2>\
+            <div v-for="(day, index) in itinerary" :key="index" class="bg-bgLight rounded-xl p-4 shadow-sm">\
+                <h3 class="font-bold text-brandDark mb-3">\{\{ day.title \}\}</h3>\
+                <div v-for="(item, i) in day.places" :key="i" class="flex justify-between items-center bg-white p-3 rounded-lg mb-2 shadow-sm border border-gray-100">\
+                    <div>\
+                        <p class="text-sm text-gray-500">\{\{ item.time \}\}</p>\
+                        <p class="font-medium text-gray-800">\{\{ item.name \}\}</p>\
+                    </div>\
+                    <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(item.name)" target="_blank" class="bg-brand text-white p-2 rounded-full w-10 h-10 flex items-center justify-center hover:bg-brandDark transition">\
+                        <i class="fa-solid fa-location-arrow"></i>\
+                    </a>\
+                </div>\
+            </div>\
+        </div>\
+\
+        <div v-show="activeTab === 'expenses'" class="space-y-4">\
+            <h2 class="text-lg font-bold text-gray-700 border-l-4 border-brand pl-2">\uc0\u20844 \u36027 \u20998 \u24115 </h2>\
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">\
+                <label class="block text-sm text-gray-500 mb-1">\uc0\u36664 \u20837 \u33457 \u36027  (JPY)</label>\
+                <input v-model.number="newExpenseJPY" type="number" placeholder="\uc0\u26085 \u22291 \u37329 \u38989 " class="w-full border-b-2 border-brand focus:outline-none py-2 mb-2 text-lg">\
+                <p class="text-sm text-gray-400 mb-4">\uc0\u32004 \u21512  HKD: \{\{ (newExpenseJPY / exchangeRate).toFixed(1) || 0 \}\}</p>\
+                <input v-model="newExpenseDesc" type="text" placeholder="\uc0\u33457 \u36027 \u38917 \u30446  (\u20363 \u65306 \u26202 \u39184 )" class="w-full bg-gray-50 rounded-lg p-2 mb-3 outline-none">\
+                <button @click="addExpense" class="w-full bg-brand text-white font-bold py-2 rounded-lg">\uc0\u26032 \u22686 \u32000 \u37636 </button>\
+            </div>\
+            \
+            <div class="space-y-2">\
+                <div v-for="(exp, index) in expenses" :key="index" class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">\
+                    <span>\{\{ exp.desc \}\}</span>\
+                    <div class="text-right">\
+                        <p class="font-bold text-gray-800">\'a5 \{\{ exp.jpy \}\}</p>\
+                        <p class="text-xs text-gray-400">HKD \{\{ (exp.jpy / exchangeRate).toFixed(1) \}\}</p>\
+                    </div>\
+                </div>\
+            </div>\
+        </div>\
+\
+        <div v-show="activeTab === 'shopping'" class="space-y-4">\
+            <h2 class="text-lg font-bold text-gray-700 border-l-4 border-brand pl-2">\uc0\u36092 \u29289 \u28165 \u21934 </h2>\
+            <div class="flex gap-2 mb-4">\
+                <input v-model="newShopItem" type="text" placeholder="\uc0\u24819 \u36023 \u20160 \u40636 \u65311 " class="flex-1 bg-white border border-gray-200 rounded-lg p-2 outline-none focus:border-brand">\
+                <input v-model.number="newShopPrice" type="number" placeholder="\uc0\u38928 \u20272  JPY" class="w-24 bg-white border border-gray-200 rounded-lg p-2 outline-none focus:border-brand">\
+                <button @click="addShopItem" class="bg-brand text-white px-4 rounded-lg"><i class="fa-solid fa-plus"></i></button>\
+            </div>\
+            \
+            <div class="space-y-2">\
+                <div v-for="(item, index) in shoppingList" :key="index" class="flex items-center bg-white p-3 rounded-lg shadow-sm" :class="\{'opacity-50': item.done\}">\
+                    <input type="checkbox" v-model="item.done" class="w-5 h-5 text-brand rounded focus:ring-brand mr-3 accent-brand">\
+                    <div class="flex-1" :class="\{'line-through text-gray-400': item.done\}">\{\{ item.name \}\}</div>\
+                    <div class="text-right">\
+                        <p class="font-bold text-sm">\'a5 \{\{ item.price || 0 \}\}</p>\
+                        <p class="text-xs text-gray-400">HKD \{\{ ((item.price || 0) / exchangeRate).toFixed(1) \}\}</p>\
+                    </div>\
+                </div>\
+            </div>\
+            <div class="mt-4 bg-brandDark text-white p-4 rounded-xl flex justify-between items-center shadow-md">\
+                <span class="font-bold">\uc0\u32317 \u38928 \u35336 \u33457 \u36027 \u65306 </span>\
+                <div class="text-right">\
+                    <p>\'a5 \{\{ totalShopJPY \}\}</p>\
+                    <p class="text-sm opacity-80">HKD \{\{ (totalShopJPY / exchangeRate).toFixed(1) \}\}</p>\
+                </div>\
+            </div>\
+        </div>\
+\
+        <div v-show="activeTab === 'luggage'" class="space-y-4">\
+            <h2 class="text-lg font-bold text-gray-700 border-l-4 border-brand pl-2">\uc0\u34892 \u26446 \u28165 \u21934 </h2>\
+            <div class="bg-gray-200 rounded-full h-4 mb-6 overflow-hidden">\
+                <div class="bg-brand h-4 transition-all duration-500" :style="\{ width: luggageProgress + '%' \}"></div>\
+            </div>\
+            <p class="text-center text-sm text-gray-500 mt-[-15px] mb-4">\uc0\u25171 \u21253 \u36914 \u24230 \u65306 \{\{ luggageProgress \}\}%</p>\
+\
+            <div v-for="(category, catIndex) in luggageList" :key="catIndex" class="mb-4">\
+                <h3 class="font-bold text-gray-600 mb-2 bg-gray-100 py-1 px-2 rounded">\{\{ category.name \}\}</h3>\
+                <div class="space-y-2 pl-2">\
+                    <label v-for="(item, itemIndex) in category.items" :key="itemIndex" class="flex items-center space-x-3 cursor-pointer">\
+                        <input type="checkbox" v-model="item.done" class="w-5 h-5 accent-brand">\
+                        <span :class="\{'line-through text-gray-400': item.done, 'text-gray-700': !item.done\}">\{\{ item.name \}\}</span>\
+                    </label>\
+                </div>\
+            </div>\
+        </div>\
+\
+        <div v-show="activeTab === 'photos'" class="space-y-4">\
+            <div class="flex justify-between items-center mb-4">\
+                <h2 class="text-lg font-bold text-gray-700 border-l-4 border-brand pl-2">\uc0\u22238 \u25014 \u30456 \u29255 \u29254 </h2>\
+                <input type="file" ref="fileInput" @change="handleFileUpload" accept="image/*" class="hidden">\
+                <button @click="$refs.fileInput.click()" class="bg-brand text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-sm hover:bg-brandDark transition">\
+                    <i class="fa-solid fa-camera mr-1"></i> \uc0\u19978 \u20659 \
+                </button>\
+            </div>\
+            \
+            <div class="masonry">\
+                <div v-for="(photo, index) in photos" :key="index" class="masonry-item bg-white p-2 rounded-xl shadow-sm border border-gray-100">\
+                    <img :src="photo.url" class="w-full rounded-lg object-cover">\
+                    <input v-model="photo.desc" type="text" placeholder="\uc0\u23531 \u19979 \u19968 \u21477 \u35441 ..." class="w-full mt-2 text-sm text-gray-600 outline-none bg-transparent">\
+                </div>\
+            </div>\
+            <p v-if="photos.length === 0" class="text-center text-gray-400 mt-10">\uc0\u36996 \u27794 \u26377 \u29031 \u29255 \u21908 \u65281 \u24555 \u40670 \u25802 \u19978 \u26041 \u25353 \u37397 \u19978 \u20659 \u21543 \u12290 </p>\
+        </div>\
+\
+    </div>\
+\
+    <div class="fixed bottom-0 w-full max-w-[480px] bg-white border-t border-gray-200 flex justify-around items-center py-3 pb-6 px-2 shadow-[0_-5px_10px_rgba(0,0,0,0.02)] z-50">\
+        <button @click="activeTab = 'itinerary'" :class="activeTab === 'itinerary' ? 'text-brand' : 'text-gray-400'" class="flex flex-col items-center flex-1 transition-colors">\
+            <i class="fa-solid fa-map-location-dot text-xl mb-1"></i><span class="text-[10px]">\uc0\u34892 \u31243 </span>\
+        </button>\
+        <button @click="activeTab === 'expenses' ? activeTab = 'itinerary' : activeTab = 'expenses'" :class="activeTab === 'expenses' ? 'text-brand' : 'text-gray-400'" class="flex flex-col items-center flex-1 transition-colors">\
+            <i class="fa-solid fa-wallet text-xl mb-1"></i><span class="text-[10px]">\uc0\u20998 \u24115 </span>\
+        </button>\
+        <button @click="activeTab = 'shopping'" :class="activeTab === 'shopping' ? 'text-brand' : 'text-gray-400'" class="flex flex-col items-center flex-1 transition-colors">\
+            <i class="fa-solid fa-bag-shopping text-xl mb-1"></i><span class="text-[10px]">\uc0\u36092 \u29289 </span>\
+        </button>\
+        <button @click="activeTab = 'luggage'" :class="activeTab === 'luggage' ? 'text-brand' : 'text-gray-400'" class="flex flex-col items-center flex-1 transition-colors">\
+            <i class="fa-solid fa-suitcase text-xl mb-1"></i><span class="text-[10px]">\uc0\u34892 \u26446 </span>\
+        </button>\
+        <button @click="activeTab = 'photos'" :class="activeTab === 'photos' ? 'text-brand' : 'text-gray-400'" class="flex flex-col items-center flex-1 transition-colors">\
+            <i class="fa-solid fa-images text-xl mb-1"></i><span class="text-[10px]">\uc0\u30456 \u31807 </span>\
+        </button>\
+    </div>\
+</div>\
+\
+<script>\
+    const \{ createApp, ref, computed, watch, onMounted \} = Vue\
+\
+    createApp(\{\
+        setup() \{\
+            const activeTab = ref('itinerary')\
+            const exchangeRate = ref(19.5) // \uc0\u38928 \u35373  1 HKD = 19.5 JPY\
+            \
+            // \uc0\u25235 \u21462 \u30495 \u23526 \u21295 \u29575 \
+            const fetchExchangeRate = async () => \{\
+                try \{\
+                    // \uc0\u20351 \u29992 \u20813 \u36027 \u21295 \u29575  API (\u33509 \u22833 \u25928 \u26371 \u20445 \u30041 \u38928 \u35373 \u20540 )\
+                    const res = await fetch('https://api.exchangerate-api.com/v4/latest/HKD');\
+                    const data = await res.json();\
+                    if(data && data.rates && data.rates.JPY) \{\
+                        exchangeRate.value = data.rates.JPY;\
+                    \}\
+                \} catch (e) \{\
+                    console.log('\uc0\u21295 \u29575 \u26356 \u26032 \u22833 \u25943 \u65292 \u20351 \u29992 \u38928 \u35373 \u20540 ', e);\
+                \}\
+            \}\
+\
+            // --- \uc0\u29376 \u24907 \u33287 \u38928 \u35373 \u36039 \u26009  ---\
+            const itinerary = ref([\
+                \{ title: 'Day 1: \uc0\u25269 \u36948 \u33287 \u36891 \u34903 ', places: [\{ time: '14:00', name: '\u38364 \u35199 \u22283 \u38555 \u27231 \u22580 ' \}, \{ time: '18:00', name: '\u36947 \u38931 \u22528 /\u24515 \u40779 \u27211 ' \}] \},\
+                \{ title: 'Day 2: \uc0\u27387 \u33457 \u33287 \u25991 \u21270 ', places: [\{ time: '10:00', name: '\u22823 \u38442 \u22478 \u20844 \u22290 ' \}, \{ time: '14:00', name: '\u40657 \u38272 \u24066 \u22580 ' \}, \{ time: '19:00', name: '\u27611 \u39340 \u27387 \u20043 \u23470 \u20844 \u22290  (\u22812 \u27387 )' \}] \},\
+                \{ title: 'Day 3: \uc0\u29378 \u27489 \u27138 \u22290 ', places: [\{ time: '08:30', name: '\u26085 \u26412 \u29872 \u29699 \u24433 \u22478  USJ' \}] \}\
+            ])\
+\
+            const expenses = ref([])\
+            const newExpenseJPY = ref('')\
+            const newExpenseDesc = ref('')\
+            \
+            const shoppingList = ref([\
+                \{ name: 'Bikkura Pon \uc0\u25197 \u34507 ', price: 1500, done: false \},\
+                \{ name: '\uc0\u21512 \u21147 \u20182 \u21629  EX', price: 5500, done: false \}\
+            ])\
+            const newShopItem = ref('')\
+            const newShopPrice = ref('')\
+\
+            const luggageList = ref([\
+                \{ name: '\uc0\u37325 \u35201 \u29289 \u21697 ', items: [\{ name: '\u35703 \u29031  (\u27298 \u26597 \u25928 \u26399 )', done: false \}, \{ name: '\u26085 \u24163 \u29694 \u37329 \u33287 \u20449 \u29992 \u21345 ', done: false \}, \{ name: 'USJ \u38272 \u31080  QRCode', done: false \}] \},\
+                \{ name: '\uc0\u34915 \u29289 \u31359 \u25645 ', items: [\{ name: '\u36629 \u34180 \u38450 \u39080 \u22806 \u22871 ', done: false \}, \{ name: '\u22909 \u36208 \u30340 \u29699 \u38795 ', done: false \}, \{ name: '\u20839 \u34915 \u35122  x4', done: false \}] \}\
+            ])\
+\
+            const photos = ref([])\
+\
+            // --- \uc0\u21151 \u33021 \u37007 \u36655  ---\
+            const addExpense = () => \{\
+                if (newExpenseJPY.value && newExpenseDesc.value) \{\
+                    expenses.value.push(\{ jpy: newExpenseJPY.value, desc: newExpenseDesc.value \})\
+                    newExpenseJPY.value = ''; newExpenseDesc.value = '';\
+                \}\
+            \}\
+\
+            const addShopItem = () => \{\
+                if (newShopItem.value) \{\
+                    shoppingList.value.push(\{ name: newShopItem.value, price: newShopPrice.value || 0, done: false \})\
+                    newShopItem.value = ''; newShopPrice.value = '';\
+                \}\
+            \}\
+\
+            const totalShopJPY = computed(() => \{\
+                return shoppingList.value.reduce((sum, item) => sum + (item.price || 0), 0)\
+            \})\
+\
+            const luggageProgress = computed(() => \{\
+                let total = 0; let done = 0;\
+                luggageList.value.forEach(cat => \{\
+                    cat.items.forEach(item => \{\
+                        total++;\
+                        if(item.done) done++;\
+                    \})\
+                \})\
+                return total === 0 ? 0 : Math.round((done / total) * 100)\
+            \})\
+\
+            const handleFileUpload = (event) => \{\
+                const file = event.target.files[0];\
+                if (file) \{\
+                    const reader = new FileReader();\
+                    reader.onload = (e) => \{\
+                        // \uc0\u20351 \u29992  unshift \u35731 \u26368 \u26032 \u29031 \u29255 \u25490 \u22312 \u26368 \u21069 \u38754 \
+                        photos.value.unshift(\{ url: e.target.result, desc: '' \});\
+                    \};\
+                    reader.readAsDataURL(file);\
+                \}\
+            \}\
+\
+            // --- LocalStorage \uc0\u25345 \u20037 \u21270  ---\
+            const saveData = () => \{\
+                const data = \{\
+                    expenses: expenses.value,\
+                    shoppingList: shoppingList.value,\
+                    luggageList: luggageList.value,\
+                    photos: photos.value\
+                \}\
+                localStorage.setItem('osakaApp2026', JSON.stringify(data))\
+            \}\
+\
+            const loadData = () => \{\
+                const saved = localStorage.getItem('osakaApp2026')\
+                if (saved) \{\
+                    const parsed = JSON.parse(saved)\
+                    if (parsed.expenses) expenses.value = parsed.expenses\
+                    if (parsed.shoppingList) shoppingList.value = parsed.shoppingList\
+                    if (parsed.luggageList) luggageList.value = parsed.luggageList\
+                    if (parsed.photos) photos.value = parsed.photos\
+                \}\
+            \}\
+\
+            // \uc0\u30435 \u32893 \u36039 \u26009 \u35722 \u26356 \u65292 \u33258 \u21205 \u23384 \u27284  (\u28145 \u24230 \u30435 \u32893 )\
+            watch([expenses, shoppingList, luggageList, photos], saveData, \{ deep: true \})\
+\
+            // \uc0\u21021 \u22987 \u21270 \u26178 \u35712 \u21462 \u36039 \u26009 \u20006 \u25235 \u21295 \u29575 \
+            onMounted(() => \{\
+                loadData()\
+                fetchExchangeRate()\
+            \})\
+\
+            return \{\
+                activeTab, exchangeRate, fetchExchangeRate,\
+                itinerary, expenses, newExpenseJPY, newExpenseDesc, addExpense,\
+                shoppingList, newShopItem, newShopPrice, addShopItem, totalShopJPY,\
+                luggageList, luggageProgress,\
+                photos, handleFileUpload\
+            \}\
+        \}\
+    \}).mount('#app')\
+</script>\
+</body>\
+</html>}
